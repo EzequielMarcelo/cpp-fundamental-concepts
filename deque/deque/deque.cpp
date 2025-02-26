@@ -1,49 +1,33 @@
 #include <iostream>
 #include <thread>
-#include <deque>
-#include <chrono>
-#include <shared_mutex>
-#include <atomic>
+#include "SafeQueue.h"
 
 using namespace std;
 
-#define MAX_SIZE 10
-
-shared_mutex queue_lock;
 atomic<bool> transmitter_done(false); // Sinaliza quando o transmissor terminar
 
-void Transmitter(deque<int> &queue)
+void Transmitter(SafeQueue<int> &queue)
 {
     for (int data = 0; data < 20; data++)
     {
-        unique_lock<shared_mutex> lock(queue_lock);
-
-        if (queue.size() >= MAX_SIZE)
-            queue.pop_front();
-
-        queue.push_back(data);
+        queue.push(data);
         cout << "Enviado: " << data << endl;
-        lock.unlock();
 
         this_thread::sleep_for(chrono::milliseconds(100));
     }
     transmitter_done = true;
 }
 
-void Receiver(deque<int> &queue)
+void Receiver(SafeQueue<int> &queue)
 {
     while (true)
     {
-        unique_lock<shared_mutex> lock(queue_lock);
-
         if (queue.empty() && transmitter_done) 
             break;
       
         if(!queue.empty())
         {
-            int data = queue.front();
-            queue.pop_front();
-            lock.unlock();
+            int data = queue.pop();
             cout << "Recebido: " << data << endl;
         }         
 
@@ -53,7 +37,7 @@ void Receiver(deque<int> &queue)
 
 int main()
 {
-    deque<int> queue;
+    SafeQueue<int> queue(10);
 
     thread tx_thread(Transmitter, ref(queue));
     thread rx_thread(Receiver, ref(queue));
