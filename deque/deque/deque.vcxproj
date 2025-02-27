@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="deque.cpp" />
-    <ClCompile Include="SafeQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SafeQueue.h" />

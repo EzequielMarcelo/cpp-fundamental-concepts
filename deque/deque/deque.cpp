@@ -6,9 +6,9 @@ using namespace std;
 
 atomic<bool> transmitter_done(false); // Sinaliza quando o transmissor terminar
 
-void Transmitter(SafeQueue<int> &queue)
+void Transmitter(SafeQueue<float> &queue)
 {
-    for (int data = 0; data < 20; data++)
+    for (float data = 0; data < 20; data+=0.5)
     {
         queue.push(data);
         cout << "Enviado: " << data << endl;
@@ -18,7 +18,7 @@ void Transmitter(SafeQueue<int> &queue)
     transmitter_done = true;
 }
 
-void Receiver(SafeQueue<int> &queue)
+void Receiver(SafeQueue<float> &queue)
 {
     while (true)
     {
@@ -27,7 +27,7 @@ void Receiver(SafeQueue<int> &queue)
       
         if(!queue.empty())
         {
-            int data = queue.pop();
+            float data = queue.pop();
             cout << "Recebido: " << data << endl;
         }         
 
@@ -37,7 +37,7 @@ void Receiver(SafeQueue<int> &queue)
 
 int main()
 {
-    SafeQueue<int> queue(10);
+    SafeQueue<float> queue(10);
 
     thread tx_thread(Transmitter, ref(queue));
     thread rx_thread(Receiver, ref(queue));
